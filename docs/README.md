@@ -44,10 +44,9 @@ Following sections are Kubernetes specific. If you are Kubernetes user, use foll
 
 
 ## Container Images:
-|OSC EBS CSI Driver Version | Image                               |
-|---------------------------|-------------------------------------|
-|master branch              |amazon/aws-ebs-csi-driver:latest     |
-|OSC-MIGRATION              |amazon/aws-ebs-csi-driver:v0.0.0-beta|
+|OSC EBS CSI Driver Version | Image                                     |
+|---------------------------|-------------------------------------------|
+|master branch              |outscale/osc-ebs-csi-driver:v0.0.0beta     |
 
 ## Features
 * **Static Provisioning** - create a new or migrating existing EBS volumes, then create persistence volume (PV) from the EBS volume and consume the PV from container using persistence volume claim (PVC).
@@ -135,13 +134,13 @@ Dependencies are managed through go module. To build the project, first turn on 
 * To execute sanity test run: `make test-sanity`
 * To execute integration tests, run:
 ```
-OSC_ACCOUNT_ID=XXXXX : the osc user id
-OSC_ACCOUNT_IAM=xxxx: eim user name 
-OSC_USER_ID=XXXX: the eim user id
-OSC_ARN="XXXXX" : the eim user orn
-AWS_ACCESS_KEY_ID=XXXX : the  AK
-AWS_SECRET_ACCESS_KEY=XXXX : the SK
-AWS_DEFAULT_REGION=XXX: the Region to be used
+export OSC_ACCOUNT_ID=XXXXX : the osc user id
+export OSC_ACCOUNT_IAM=xxxx: eim user name 
+export OSC_USER_ID=XXXX: the eim user id
+export OSC_ARN="XXXXX" : the eim user orn
+export AWS_ACCESS_KEY_ID=XXXX : the  AK
+export AWS_SECRET_ACCESS_KEY=XXXX : the SK
+export AWS_DEFAULT_REGION=XXX: the Region to be used
 
 ./run_int_test.sh
 
