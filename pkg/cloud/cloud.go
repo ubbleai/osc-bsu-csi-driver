@@ -332,7 +332,7 @@ func (c *cloud) CreateDisk(ctx context.Context, volumeName string, diskOptions *
 	resTag, err := c.ec2.CreateTagsWithContext(ctx, requestTag)
 
 	if err != nil {
-		return nil, fmt.Errorf("error creating tags of volume %s: %v", response.VolumeId, err)
+		return nil, fmt.Errorf("error creating tags of volume %v: %v", response.VolumeId, err)
 	}
 	if resTag == nil {
 		return nil, fmt.Errorf("nil CreateTags")
@@ -576,7 +576,7 @@ func (c *cloud) CreateSnapshot(ctx context.Context, volumeID string, snapshotOpt
 	resTag, err := c.ec2.CreateTagsWithContext(ctx, requestTag)
 
 	if err != nil {
-		return nil, fmt.Errorf("error creating tags of snapshot %s: %v", res.SnapshotId, err)
+		return nil, fmt.Errorf("error creating tags of snapshot %v: %v", res.SnapshotId, err)
 	}
 	if resTag == nil {
 		return nil, fmt.Errorf("nil CreateTags")

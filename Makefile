@@ -13,21 +13,23 @@
 # limitations under the License.
 
 # Docker env
+
 DOCKERFILES := $(shell find . -name '*Dockerfile*')
 LINTER_VERSION := v1.17.5
 BUILD_ENV := "buildenv/osc-bsu-csi-driver:0.0"
 BUILD_ENV_RUN := "build-osc-bsu-csi-driver"
+OSC_BSU_WORKDIR := /go/src/github.com/kubernetes-sigs/aws-ebs-csi-driver
 
-PKG=github.com/kubernetes-sigs/aws-ebs-csi-driver
-IMAGE=osc/osc-ebs-csi-driver
-IMAGE_TAG=latest
-REGISTRY=registry.kube-system:5001
-VERSION=0.5.0-osc
-GIT_COMMIT?=$(shell git rev-parse HEAD)
-BUILD_DATE?=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-LDFLAGS?="-X ${PKG}/pkg/driver.driverVersion=${VERSION} -X ${PKG}/pkg/driver.gitCommit=${GIT_COMMIT} -X ${PKG}/pkg/driver.buildDate=${BUILD_DATE}"
-GO111MODULE=on
-GOPROXY=direct
+PKG := github.com/kubernetes-sigs/aws-ebs-csi-driver
+IMAGE := osc/osc-ebs-csi-driver
+IMAGE_TAG := latest
+REGISTRY := registry.kube-system:5001
+VERSION := 0.5.0-osc
+GIT_COMMIT ?= $(shell git rev-parse HEAD)
+BUILD_DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+LDFLAGS ?= "-X ${PKG}/pkg/driver.driverVersion=${VERSION} -X ${PKG}/pkg/driver.gitCommit=${GIT_COMMIT} -X ${PKG}/pkg/driver.buildDate=${BUILD_DATE}"
+GO111MODULE := on
+GOPROXY := direct
 
 .EXPORT_ALL_VARIABLES:
 
@@ -101,3 +103,12 @@ push:
 dockerlint:
 	@echo "Lint images =>  $(DOCKERFILES)"
 	$(foreach image,$(DOCKERFILES), echo "Lint  ${image} " ; docker run --rm -i hadolint/hadolint:${LINTER_VERSION} hadolint --ignore DL3006 - < ${image} || exit 1 ; )
+
+.PHONY: build_env
+build_env:
+	docker stop $(BUILD_ENV_RUN) || true
+	docker wait $(BUILD_ENV_RUN) || true
+	docker rm -f $(BUILD_ENV_RUN) || true
+	docker build  -t $(BUILD_ENV) -f ./debug/Dockerfile_debug .
+	docker run -d -v $(PWD):$(OSC_BSU_WORKDIR) --rm -it --name $(BUILD_ENV_RUN) $(BUILD_ENV)  bash -l
+	until [[ `docker inspect -f '{{.State.Running}}' $(BUILD_ENV_RUN)` == "true" ]] ; do  sleep 1 ; done

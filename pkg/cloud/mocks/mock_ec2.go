@@ -5,11 +5,12 @@
 package mocks
 
 import (
+	reflect "reflect"
+
 	aws "github.com/aws/aws-sdk-go/aws"
 	request "github.com/aws/aws-sdk-go/aws/request"
 	ec2 "github.com/aws/aws-sdk-go/service/ec2"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockEC2 is a mock of EC2 interface
@@ -231,4 +232,16 @@ func (m *MockEC2) ModifyVolumeWithContext(arg0 aws.Context, arg1 *ec2.ModifyVolu
 func (mr *MockEC2MockRecorder) ModifyVolumeWithContext(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModifyVolumeWithContext", reflect.TypeOf((*MockEC2)(nil).ModifyVolumeWithContext), varargs...)
+}
+
+// CreateTagsWithContext mocks base method
+func (m *MockEC2) CreateTagsWithContext(arg0 aws.Context, arg1 *ec2.CreateTagsInput, arg2 ...request.Option) (*ec2.CreateTagsOutput, error) {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateTagsWithContext", varargs...)
+	ret0, _ := ret[0].(*ec2.CreateTagsOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
