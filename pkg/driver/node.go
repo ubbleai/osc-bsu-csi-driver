@@ -469,12 +469,12 @@ func (d *nodeService) findDevicePath(devicePath, volumeId string) (string, error
 	// If the path exists, assume it is not nvme device
 	if exists {
 		return devicePath, nil
-    	}
+	}
 
-       // assumption it is a scsi volume for 3DS env
-       scsiName := "scsi-0QEMU_QEMU_HARDDISK_sd" + devicePath[len(devicePath)-1:]
-       klog.V(4).Infof("findDevicePath: check if scsi device for %s is %s and return the device", devicePath ,scsiName)
-       return findScsiVolume(scsiName)
+	// assumption it is a scsi volume for 3DS env
+	scsiName := "scsi-0QEMU_QEMU_HARDDISK_sd" + devicePath[len(devicePath)-1:]
+	klog.V(4).Infof("findDevicePath: check if scsi device for %s is %s and return the device", devicePath, scsiName)
+	return findScsiVolume(scsiName)
 }
 
 func findScsiVolume(findName string) (device string, err error) {
@@ -494,7 +494,7 @@ func findScsiVolume(findName string) (device string, err error) {
 	}
 	// Find the target, resolving to an absolute path
 	// scsi-0QEMU_QEMU_HARDDISK_sdb -> ../../sdb
-        // scsi-0QEMU_QEMU_HARDDISK_sde -> ../../sda
+	// scsi-0QEMU_QEMU_HARDDISK_sde -> ../../sda
 	resolved, err := filepath.EvalSymlinks(p)
 	if err != nil {
 		return "", fmt.Errorf("error reading target of symlink %q: %v", p, err)
@@ -547,4 +547,3 @@ func (d *nodeService) getVolumesLimit() int64 {
 	}
 	return defaultMaxEBSVolumes
 }
-
