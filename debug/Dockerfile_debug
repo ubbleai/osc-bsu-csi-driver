@@ -15,9 +15,3 @@ RUN apt-get -y update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /go/src/github.com/kubernetes-sigs/aws-ebs-csi-driver
-COPY . .
-RUN make -j 4 && \
-    cp /go/src/github.com/kubernetes-sigs/aws-ebs-csi-driver/bin/aws-ebs-csi-driver /bin/aws-ebs-csi-driver
-
-
-ENTRYPOINT ["/bin/aws-ebs-csi-driver"]

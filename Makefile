@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Docker env
+DOCKERFILES := $(shell find . -name '*Dockerfile*')
+LINTER_VERSION := v1.17.5
+BUILD_ENV := "buildenv/osc-bsu-csi-driver:0.0"
+BUILD_ENV_RUN := "build-osc-bsu-csi-driver"
+
 PKG=github.com/kubernetes-sigs/aws-ebs-csi-driver
 IMAGE=osc/osc-ebs-csi-driver
 IMAGE_TAG=latest
@@ -91,3 +97,7 @@ push-release:
 push:
 	docker push $(REGISTRY)/$(IMAGE):$(IMAGE_TAG)
 
+.PHONY: dockerlint
+dockerlint:
+	@echo "Lint images =>  $(DOCKERFILES)"
+	$(foreach image,$(DOCKERFILES), echo "Lint  ${image} " ; docker run --rm -i hadolint/hadolint:${LINTER_VERSION} hadolint --ignore DL3006 - < ${image} || exit 1 ; )
