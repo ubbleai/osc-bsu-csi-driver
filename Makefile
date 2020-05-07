@@ -20,6 +20,9 @@ BUILD_ENV := "buildenv/osc-bsu-csi-driver:0.0"
 BUILD_ENV_RUN := "build-osc-bsu-csi-driver"
 OSC_BSU_WORKDIR := /go/src/github.com/kubernetes-sigs/aws-ebs-csi-driver
 
+E2E_ENV := golang:1.12.7-stretch
+E2E_ENV_RUN := run-osc-bsu-csi-driver
+
 PKG := github.com/kubernetes-sigs/aws-ebs-csi-driver
 IMAGE := osc/osc-ebs-csi-driver
 IMAGE_TAG := latest
@@ -31,12 +34,16 @@ LDFLAGS ?= "-X ${PKG}/pkg/driver.driverVersion=${VERSION} -X ${PKG}/pkg/driver.g
 GO111MODULE := on
 GOPROXY := direct
 
+# Full log with  -v -x
+GO_ADD_OPTIONS := -v
+
 .EXPORT_ALL_VARIABLES:
 
 .PHONY: aws-ebs-csi-driver
 aws-ebs-csi-driver:
 	mkdir -p bin
-	CGO_ENABLED=0 GOOS=linux go build -ldflags ${LDFLAGS}  -o  bin/aws-ebs-csi-driver ./cmd/
+	CGO_ENABLED=0 GOOS=linux go build $(GO_ADD_OPTIONS) \
+		-ldflags ${LDFLAGS}  -o  bin/aws-ebs-csi-driver ./cmd/
 
 
 .PHONY: debug
@@ -55,15 +62,6 @@ test:
 .PHONY: test-sanity
 test-sanity:
 	go test -v ./tests/sanity/...
-
-.PHONY: test-integration
-test-integration:
-	./hack/run-integration-test
-
-
-.PHONY: test-e2e-single-az
-test-e2e-single-az:
-	TESTCONFIG=./tester/single-az-config.yaml go run tester/cmd/main.go
 
 .PHONY: test-e2e-multi-az
 test-e2e-multi-az:
@@ -87,10 +85,6 @@ image:
 image-tag:
 	docker tag  $(IMAGE):$(IMAGE_TAG) $(REGISTRY)/$(IMAGE):$(IMAGE_TAG)
 
-.PHONY: int_test_image
-int_test_image:
-	docker build  -t $(IMAGE)-int:latest  . -f ./Dockerfile_IntTest
-
 .PHONY: push-release
 push-release:
 	docker push $(IMAGE):$(VERSION)
@@ -112,3 +106,45 @@ build_env:
 	docker build  -t $(BUILD_ENV) -f ./debug/Dockerfile_debug .
 	docker run -d -v $(PWD):$(OSC_BSU_WORKDIR) --rm -it --name $(BUILD_ENV_RUN) $(BUILD_ENV)  bash -l
 	until [[ `docker inspect -f '{{.State.Running}}' $(BUILD_ENV_RUN)` == "true" ]] ; do  sleep 1 ; done
+
+.PHONY: test-integration
+test-integration:
+	./hack/run-integration-test
+
+.PHONY: int-test-image
+int-test-image:
+	docker build  -t $(IMAGE)-int:latest  . -f ./Dockerfile_IntTest
+
+.PHONY: run-integration-test
+run-integration-test:
+	./run_int_test.sh
+
+.PHONY: run_int_test
+run-integration-test:
+	./run_int_test.sh
+
+.PHONY: deploy
+deploy:
+	IMAGE_TAG=$(IMAGE_VERSION) IMAGE_NAME=$(REGISTRY)/$(IMAGE) . ./aws-ebs-csi-driver/deploy.sh
+
+
+
+.PHONY: test-e2e-single-az
+test-e2e-single-az:
+	@echo "test-e2e-single-az"
+	docker stop $(E2E_ENV_RUN) || true
+	docker wait $(E2E_ENV_RUN) || true
+	docker rm -f $(E2E_ENV_RUN) || true
+	docker build  -t $(E2E_ENV) -f ./tests/e2e/docker/Dockerfile_e2eTest .
+	docker run -it -d --rm \
+		-v ${PWD}:/root/aws-ebs-csi-driver \
+		-v ${HOME}:/e2e-env/ \
+		-v /etc/kubectl/:/etc/kubectl/ \
+		--name $(E2E_ENV_RUN) $(E2E_ENV) bash -l
+	until [[ `docker inspect -f '{{.State.Running}}' $(E2E_ENV_RUN)` == "true" ]] ; do  sleep 1 ; done
+	docker exec -it $(E2E_ENV_RUN) ./tests/e2e/docker/run_e2e_single_az.sh
+	docker stop $(E2E_ENV_RUN) || true
+	docker wait $(E2E_ENV_RUN) || true
+	docker rm -f $(E2E_ENV_RUN) || true
+
+
