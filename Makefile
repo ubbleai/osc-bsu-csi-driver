@@ -20,8 +20,8 @@ BUILD_ENV := "buildenv/osc-bsu-csi-driver:0.0"
 BUILD_ENV_RUN := "build-osc-bsu-csi-driver"
 OSC_BSU_WORKDIR := /go/src/github.com/kubernetes-sigs/aws-ebs-csi-driver
 
-E2E_ENV := golang:1.12.7-stretch
-E2E_ENV_RUN := run-osc-bsu-csi-driver
+E2E_ENV := "buildenv/osc-bsu-csi-driver:0.0"
+E2E_ENV_RUN := "build-osc-bsu-csi-driver"
 
 PKG := github.com/kubernetes-sigs/aws-ebs-csi-driver
 IMAGE := osc/osc-ebs-csi-driver
