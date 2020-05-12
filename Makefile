@@ -147,4 +147,12 @@ test-e2e-single-az:
 	docker wait $(E2E_ENV_RUN) || true
 	docker rm -f $(E2E_ENV_RUN) || true
 
-
+.PHONY: clean_build_env
+clean_build_env:
+	docker stop ${BUILD_ENV_RUN} || true
+	docker wait ${BUILD_ENV_RUN} || true
+	docker rm -f ${BUILD_ENV_RUN} || true
+	helm del --purge ${DEPLOY_NAME} --tls || true
+	docker stop ${E2E_ENV_RUN} || true
+	docker wait ${E2E_ENV_RUN} || true
+	docker rm -f ${E2E_ENV_RUN} || true
