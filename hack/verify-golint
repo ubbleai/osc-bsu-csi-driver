@@ -21,7 +21,7 @@ if ! which golangci-lint > /dev/null; then
     go get -v github.com/golangci/golangci-lint/cmd/golangci-lint
 fi
 
-golangci-lint run --deadline=10m 
+golangci-lint run --deadline=10m --exclude "SA1019: grpc.WithDialer is deprecated"
 
 echo "Congratulations! All Go source files have been linted."
 
