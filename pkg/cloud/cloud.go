@@ -798,12 +798,11 @@ func (c *cloud) listSnapshots(ctx context.Context, request *ec2.DescribeSnapshot
 	fmt.Printf("DebugAZ  listSnapshots(ctx context.Context : %+v\n", request)
 
 	response, err := c.ec2.DescribeSnapshotsWithContext(ctx, request)
-	fmt.Printf("DebugAZ  response.Snapshots : %+v\n", response.Snapshots)
 
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Printf("DebugAZ  response.Snapshots : %+v\n", response.Snapshots)
 	snapshots = append(snapshots, response.Snapshots...)
 
 	if response.NextToken != nil {
